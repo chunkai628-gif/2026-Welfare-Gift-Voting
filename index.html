@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>福委會年度禮品投票 / Welfare Committee Annual Gift Voting</title>
+  <style>
+    body{font-family:system-ui,-apple-system,"Noto Sans TC",Arial,sans-serif;margin:0;background:#f6f7fb;color:#202124}
+    .wrap{max-width:760px;margin:32px auto;padding:24px}
+    .card{background:#fff;border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.08);padding:28px}
+    h1{font-size:24px;margin:0 0 8px}.sub{color:#5f6368;margin-bottom:24px;line-height:1.5}
+    label{display:block;font-weight:700;margin-top:16px}.en{font-weight:500;color:#5f6368;font-size:13px}
+    input[type=text],input[type=email]{width:100%;box-sizing:border-box;margin-top:8px;padding:12px;border:1px solid #dadce0;border-radius:10px;font-size:16px}
+    .gift{border:1px solid #dadce0;border-radius:12px;padding:12px;margin-top:10px}
+    .gift label{margin:8px 0;font-weight:600}
+    button{margin-top:22px;width:100%;padding:13px;border:0;border-radius:10px;background:#1a73e8;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+    button:disabled{background:#9aa0a6;cursor:not-allowed}.msg{margin-top:16px;padding:12px;border-radius:10px;display:none;white-space:pre-line}
+    .ok{background:#e6f4ea;color:#137333}.err{background:#fce8e6;color:#a50e0e}.note{font-size:13px;color:#5f6368;margin-top:10px;line-height:1.5}
+  </style>
+</head>
+<body>
+  <div class="wrap"><div class="card">
+    <h1>福委會年度禮品投票<br><span class="en">Welfare Committee Annual Gift Voting</span></h1>
+    <div class="sub">投票期間 Voting Period：2026/05/12 00:00 – 2026/05/18 12:00 PM<br>一人限填一份，期間內可再次提交修改。One response per person; changes are allowed during the voting period.</div>
+    <form id="voteForm">
+      <label>姓名 <span class="en">Name</span><input required name="name" type="text" autocomplete="name"></label>
+      <label>Email <span class="en">Email</span><input required name="email" type="email" autocomplete="email"></label>
+      <label>工號 <span class="en">Employee ID</span><input required name="employeeId" type="text"></label>
+      <label>禮物 <span class="en">Gift</span></label>
+      <div class="gift">
+        <label><input required type="radio" name="gift" value="Option A: 開運金豆 / Lucky Golden Bean"> Option A：開運金豆 / Lucky Golden Bean</label>
+        <label><input type="radio" name="gift" value="Option B: 肩頸按摩器 / Neck & Shoulder Massager"> Option B：肩頸按摩器 / Neck & Shoulder Massager</label>
+      </div>
+      <button id="submitBtn" type="submit">送出 / Submit</button>
+      <div class="note">系統會以工號為唯一鍵；相同工號再次送出將更新原紀錄。Employee ID is used as the unique key; resubmission updates the existing record.</div>
+      <div id="msg" class="msg"></div>
+    </form>
+  </div></div>
+<script>
+const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzz73VFAppC7_Qjin4VdD0lkC5krQemtEyNjdZlLgmb7NMWvd6rXW8VAiFbPzW808zF/exec";
+document.getElementById("voteForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("submitBtn");
+  const msg = document.getElementById("msg");
+  btn.disabled = true; msg.style.display="none";
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  try {
+    const res = await fetch(ENDPOINT_URL, {
+      method: "POST",
+      mode: "cors",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify(data)
+    });
+    const out = await res.json();
+    msg.className = "msg " + (out.ok ? "ok" : "err");
+    msg.textContent = out.message;
+    msg.style.display = "block";
+  } catch (err) {
+    msg.className = "msg err";
+    msg.textContent = "送出失敗，請稍後再試。/ Submission failed. Please try again later.";
+    msg.style.display = "block";
+  } finally { btn.disabled = false; }
+});
+</script>
+</body>
+</html>
